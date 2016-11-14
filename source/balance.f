@@ -8,7 +8,7 @@
       real dz, T1,CF,CF2,Bprime,LW
       real R
       real K_th
-      real g,Rib_l
+      real g,Rib_l,Rib
       real xB,xC,xD,Chi2,Chw2,Ta_l,Tsi_l,T0
       real nn, aKL, bKL ! nn-total cloud amount 0-1; aKL,bKL Konig-Langlo koefficients 
       nn=0.
@@ -28,8 +28,8 @@
 !         K_th = Ki
 !         dz = hi
 !      endif
-      open(15,file='reference_U_hdb.txt')
-      open(16,file='linear_U.txt')
+      open(15,file='reference_U_cb.txt')
+      open(16,file='linear_U_hdb.txt')
 !      do iu = 1,20
 !         hi = 0.2+0.1*iu
 
@@ -47,21 +47,22 @@
 !--------begin iteration----------------!
       do i = 1,50
 
-         
-         A = eps*sig
-         CF = (1.-frac)*Chw/((1.-frac)*Chw + frac*Chi)
+cccccccccccc full procedure ccccccccccccccccc         
+c         A = eps*sig
+c         CF = (1.-frac)*Chw/((1.-frac)*Chw + frac*Chi)
 c         
-         B = ro*cp*Chi*U*CF + Ks/hs*(Ki*hs)/(Ki*hs + Ks*hi)
-         C = -B*Tb - R*ro*cp*Chi/((1.-frac)*Chw + frac*Chi)
-     :   - (aKL+bKL*nn**3.)*eps*sig*(Ta)**4.
-         f = A*Tsi**4. + B*Tsi + C
-         fp = 4.*A*Tsi**3. + B
-         Tsi = Tsi - f/fp    
-!         Tsi = 240.
+c         B = ro*cp*Chi*U*CF + Ks/hs*(Ki*hs)/(Ki*hs + Ks*hi)
+c         C = -B*Tb - R*ro*cp*Chi/((1.-frac)*Chw + frac*Chi)
+c     :   - (aKL+bKL*nn**3.)*eps*sig*(Ta)**4.
+c         f = A*Tsi**4. + B*Tsi + C
+c         fp = 4.*A*Tsi**3. + B
+c         Tsi = Tsi - f/fp    
+         Tsi = 240.
          call surf_layer_t
          Chi = - tst_s*ust_s/(U*(Tsi-Ta))
          Chw = - tst_s2*ust_s2/(U*(Tb-Ta))
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+         Chw = 1.5e-3         
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c         Chi = - tst_s*ust_s/(U*(Tsi-Ta))
 c         Chw = - tst_s2*ust_s2/(U*(Tb-Ta))
 c         A = eps*sig
@@ -91,12 +92,13 @@ cccccccccccccccccc  LINEAR cccccccccccccccccccccccc
       Ta_l = ((1.-frac)*Chw2*Tb + frac*Chi2*Tsi_l + R) /
      :        ((1.-frac)*Chw2 + frac*Chi2)
 
+      Rib = (g/(0.5*(Ta+Tsi)))*(Ta - Tsi)*10/U**2.
       Rib_l = (g/(0.5*(Ta_l+Tsi_l)))*(Ta_l - Tsi_l)*10/U**2.
 
       write(15,'(3f10.3,f12.5,2f10.4)')
      :               U,Ta,Tsi,frac*Chi/(1-frac)/Chw,
      :                          Chi*1000,Chw*1000
-       write(0,*) U,Ta, Tsi
+       write(0,*) U,Ta, Rib*U**2
     
       write(16,'(3f10.3,f10.4)')U,Ta_l, Tsi_l, Rib_l
       enddo
